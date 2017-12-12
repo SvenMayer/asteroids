@@ -58,3 +58,53 @@ class GamePiece():
         new_y = self.position[1] + self.velocity[1] * dt
 
         self.position = (new_x, new_y, new_angle)
+
+
+class ConvexPolygon(object):
+    def __init__(self, xy):
+        self.xy = xy
+
+        # Calculate the unity vector for each side.
+        self.side = []
+        for i in range(-1, len(self.xy) - 1):
+            side_vector = (self.xy[i+1][0] - self.xy[i][0],
+                           self.xy[i+1][1] - self.xy[i][1])
+            len_side = np.sqrt(side_vector[0]**2. + side_vector[1]**2.)
+            self.side.append((side_vector[0] / len_side,
+                              side_vector[1] / len_side))
+        self.side = self.side[1:] + self.side[:1]
+
+        # Calculate the normal for each side.
+        self.side_normal = []
+        for side in self.side:
+            self.side_normal.append((-1.*side[1], side[0]))
+
+    def projection(self, proj_vec):
+        return [xy[0] * proj_vec[0] + xy[1] * proj_vec[1] for
+                xy in self.xy]
+
+    def collides(self, other):
+        # Find out which polygon has less sides to minimize the number
+        # of projections needed to check for collision.
+        if len(self.xy) < len(other.xy):
+            normals = self.side_normal
+        else:
+            normals = other.side_normal
+
+        collides = True
+        for normal in normals:
+            my_points = self.projection(normal)
+            other_points = other.projection(normal)
+            my_range = min(my_points), max(my_points)
+            other_range = min(other_points), max(other_points)
+            if not (my_range[1] > other_range[0] and
+                    my_range[0] < other_range[1]):
+                collides = False
+                break
+
+        return collides
+
+
+class Polygon(object):
+    def __init__(self, xy):
+        pass

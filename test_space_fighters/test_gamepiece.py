@@ -87,5 +87,70 @@ class TestGamePiece(unittest.TestCase):
                                gamePiece.position[2])
 
 
+class TestConvexPolygon(unittest.TestCase):
+    def test_init(self):
+        xy = (0., 0.), (1., 2.), (-2., 1.), (-1., -1.)
+        con_pol = GamePiece.ConvexPolygon(xy=xy)
+        self.assertIsInstance(con_pol, GamePiece.ConvexPolygon)
+
+    def test_side_vectors(self):
+        xy = (0., 0.), (1., 2.), (-2., 1.)
+        side = []
+        len_side = []
+        unity_side = []
+        for i in range(-1, len(xy)-1):
+            side.append((xy[i+1][0]-xy[i][0], xy[i+1][1]-xy[i][1]))
+            len_side.append(np.sqrt(side[-1][0]**2. + side[-1][1]**2.))
+            unity_side.append((side[-1][0]/len_side[-1], side[-1][1]/len_side[-1]))
+        unity_side = unity_side[1:] + unity_side[:1]
+
+        con_pol = GamePiece.ConvexPolygon(xy)
+        self.assertAlmostEqual(unity_side[0][0]+unity_side[1][0]+
+                               unity_side[2][0]+unity_side[0][1]+
+                               unity_side[1][1]+unity_side[2][1],
+                               con_pol.side[0][0]+con_pol.side[1][0]+
+                               con_pol.side[2][0]+con_pol.side[0][1]+
+                               con_pol.side[1][1]+con_pol.side[2][1])
+
+    def test_side_normal_vector(self):
+        xy = (0., 0.), (0., 1.), (1., 1.)
+        con_pol = GamePiece.ConvexPolygon(xy)
+        self.assertAlmostEqual(np.abs(con_pol.side_normal[0][0]+
+                               con_pol.side_normal[0][1])+
+                               np.abs(con_pol.side_normal[1][0]+
+                               con_pol.side_normal[1][1])+
+                               np.abs(con_pol.side_normal[2][0]+
+                               con_pol.side_normal[2][1]),
+                               1. + 0. + 1. )
+
+    def test_projection(self):
+        xy = [(0., 0.), (1., 1.), (-1., 1.)]
+        poly = GamePiece.ConvexPolygon(xy)
+        proj = poly.projection((1./np.sqrt(2.), 1./np.sqrt(2.)))
+        self.assertAlmostEqual(proj[0] + proj[1] + proj[2], np.sqrt(2.))
+
+    def test_collision(self):
+        poly1 = GamePiece.ConvexPolygon([(0., 0.), (1., 1.), (0., 1.)])
+        poly2 = GamePiece.ConvexPolygon([(1., 0.), (0.8, 1.), (2., 1.)])
+        self.assertTrue(poly1.collides(poly2))
+
+    def test_nocollision(self):
+        poly1 = GamePiece.ConvexPolygon([(0., 0.), (1., 1.), (0., 1.)])
+        poly2 = GamePiece.ConvexPolygon([(1., 0.), (1., 1.), (2., 1.)])
+        self.assertFalse(poly1.collides(poly2))
+
+
+class TestPolygon(unittest.TestCase):
+    def test_nocollision(self):
+        xy1 = [(1., -1.), (0., 0.), (1., 1.), (-1., 1.), (-1., -1.)]
+        xy2 = [(2., -1.), (0.2, 0.), (2., 1.), (3., 1.), (3., -1.)]
+        poly1 = GamePiece.Polygon(xy1)
+        poly2 = GamePiece.Polygon(xy2)
+        # TODO no collision test
+
+    def test_collision(self):
+        pass
+        # TODO collision test
+
 if __name__ == u"__main__":
     unittest.main()
