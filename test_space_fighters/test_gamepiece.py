@@ -140,17 +140,21 @@ class TestConvexPolygon(unittest.TestCase):
         self.assertFalse(poly1.collides(poly2))
 
 
-class TestPolygon(unittest.TestCase):
+class TestSimplePolygon(unittest.TestCase):
     def test_nocollision(self):
         xy1 = [(1., -1.), (0., 0.), (1., 1.), (-1., 1.), (-1., -1.)]
         xy2 = [(2., -1.), (0.2, 0.), (2., 1.), (3., 1.), (3., -1.)]
         poly1 = GamePiece.Polygon(xy1)
         poly2 = GamePiece.Polygon(xy2)
-        # TODO no collision test
+        self.assertFalse(poly1.collides(poly2))
 
     def test_collision(self):
-        pass
-        # TODO collision test
+        xy1 = [(1., -1.), (0., 0.), (1., 1.), (-1., 1.), (-1., -1.)]
+        xy2 = [(2., -1.), (0.2, 0.), (2., 1.), (3., 1.), (3., -1.)]
+        poly1 = GamePiece.Polygon(xy1)
+        poly2 = GamePiece.Polygon(xy2)
+        self.assertTrue(poly1.collides(poly2))
+
 
 if __name__ == u"__main__":
     unittest.main()

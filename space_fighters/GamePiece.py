@@ -105,6 +105,7 @@ class ConvexPolygon(object):
         return collides
 
 
-class Polygon(object):
+class SimplePolygon(object):
+    ; TODO: Hertel-Mehlhorn
     def __init__(self, xy):
         pass
