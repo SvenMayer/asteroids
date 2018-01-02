@@ -104,8 +104,27 @@ class ConvexPolygon(object):
 
         return collides
 
+    def rotate(self, angle=0.0):
+        sina = np.sin(angle)
+        cosa = np.cos(angle)
+        self.xy = [(x*cosa-y*sina, x*sina+y*sina) for (x, y) in self.xy]
+        self.side = [(x*cosa-y*sina, x*sina+y*sina) for (x, y) in self.side]
+        self.side_normal = [(x*cosa-y*sina, x*sina+y*sina) for (x, y)
+                            in self.side_normal]
 
-class SimplePolygon(object):
-    ; TODO: Hertel-Mehlhorn
-    def __init__(self, xy):
-        pass
+
+class Ship(GamePiece):
+    def __init__(self, size, position=(0., 0., 0.), acceleration=1.5,
+                 angular_velocity=0.1*np.pi):
+        super(Ship, self).__init__(
+            position=position, acceleration=acceleration,
+            angular_velocity=angular_velocity, start_velocity=(0., 0.))
+        self._gb_repr = ConvexPolygon(
+            [(-0.2679491924311227*size, -1./3.*size),
+            (0.2679491924311227*size, -1./3.*size),
+            (0., 2./3.*size)])
+        self.size = size
+
+"""
+class Asteroid1(GamePiece):
+    def __init__(self, size, position=(0., 0., 0.), angular_velocity):"""

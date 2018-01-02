@@ -90,7 +90,7 @@ class TestGamePiece(unittest.TestCase):
 class TestConvexPolygon(unittest.TestCase):
     def test_init(self):
         xy = (0., 0.), (1., 2.), (-2., 1.), (-1., -1.)
-        con_pol = GamePiece.ConvexPolygon(xy=xy)
+        con_pol = GamePiece.ConvexPolygon(xy)
         self.assertIsInstance(con_pol, GamePiece.ConvexPolygon)
 
     def test_side_vectors(self):
@@ -139,21 +139,16 @@ class TestConvexPolygon(unittest.TestCase):
         poly2 = GamePiece.ConvexPolygon([(1., 0.), (1., 1.), (2., 1.)])
         self.assertFalse(poly1.collides(poly2))
 
+    def test_rotate(self):
+        poly = GamePiece.ConvexPolygon([(0., 0.), (0., 1.), (1., 0.)])
+        poly.rotate(np.pi/2.)
+        self.assertAlmostEqual(poly.xy[1][0], -1.)
 
-class TestSimplePolygon(unittest.TestCase):
-    def test_nocollision(self):
-        xy1 = [(1., -1.), (0., 0.), (1., 1.), (-1., 1.), (-1., -1.)]
-        xy2 = [(2., -1.), (0.2, 0.), (2., 1.), (3., 1.), (3., -1.)]
-        poly1 = GamePiece.Polygon(xy1)
-        poly2 = GamePiece.Polygon(xy2)
-        self.assertFalse(poly1.collides(poly2))
 
-    def test_collision(self):
-        xy1 = [(1., -1.), (0., 0.), (1., 1.), (-1., 1.), (-1., -1.)]
-        xy2 = [(2., -1.), (0.2, 0.), (2., 1.), (3., 1.), (3., -1.)]
-        poly1 = GamePiece.Polygon(xy1)
-        poly2 = GamePiece.Polygon(xy2)
-        self.assertTrue(poly1.collides(poly2))
+class TestShip(unittest.TestCase):
+    def test_init(self):
+        ship = GamePiece.Ship(size=2.4)
+        self.assertAlmostEqual(ship.size, 2.4)
 
 
 if __name__ == u"__main__":
