@@ -151,5 +151,22 @@ class TestShip(unittest.TestCase):
         self.assertAlmostEqual(ship.size, 2.4)
 
 
+class TestAsteroidBase(unittest.TestCase):
+    def test_init(self):
+        with self.assertRaises(TypeError):
+            GamePiece.AsteroidBase(position=(0., 0., 0.), size=1.0,
+                                   angular_velocity=0., start_velocity=(0., 0.))
+
+class TestAsteroids(unittest.TestCase):
+    def test_init_(self):
+        asteroid = GamePiece.Asteroid1(size=3.6, position=(0., 0., 0.),
+                                       angular_velocity=10.,
+                                       start_velocity=(1.2, 2.1))
+        self.assertAlmostEqual(asteroid.size+asteroid.velocity[0]+
+                               asteroid.position[0]+asteroid._angular_velocity,
+                               3.6+1.2+0.+10.)
+
+
+
 if __name__ == u"__main__":
     unittest.main()

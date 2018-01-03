@@ -5,10 +5,11 @@
 """
 import numpy as np
 
+
 class GamePiece():
     def __init__(self, position=(0., 0., 0.), acceleration=1.5,
                  angular_velocity=0.1*np.pi, start_velocity=(0., 0.)):
-        if not (isinstance(position, tuple) and len(position)==3):
+        if not (isinstance(position, tuple) and (len(position) == 3)):
             raise ValueError("argument 'position' takes tuple of size three")
         self.position = position
         self.velocity = start_velocity
@@ -48,7 +49,7 @@ class GamePiece():
             self._cos_angle = np.cos(new_angle)
 
         if self._thrust != 0:
-            self.velocity =(
+            self.velocity = (
                 self.velocity[0] +
                 self._thrust * self._acceleration * self._cos_angle * dt,
                 self.velocity[1] +
@@ -121,10 +122,37 @@ class Ship(GamePiece):
             angular_velocity=angular_velocity, start_velocity=(0., 0.))
         self._gb_repr = ConvexPolygon(
             [(-0.2679491924311227*size, -1./3.*size),
-            (0.2679491924311227*size, -1./3.*size),
-            (0., 2./3.*size)])
+             (0.2679491924311227*size, -1./3.*size),
+             (0., 2./3.*size)])
         self.size = size
 
-"""
-class Asteroid1(GamePiece):
-    def __init__(self, size, position=(0., 0., 0.), angular_velocity):"""
+
+class AsteroidBase(GamePiece):
+    def __init__(self, size, position, start_velocity, angular_velocity):
+        super(AsteroidBase, self).__init__(
+            position=position, angular_velocity=np.abs(angular_velocity))
+        # AsteroidBase cannot be instantiated.
+        if type(self) is AsteroidBase:
+            raise TypeError("AsteroidBase cannot be instantiated")
+        if angular_velocity > 0.:
+            self.turn = 1
+        elif angular_velocity < 0.:
+            self.turn = -1
+        self.size = size
+        self.velocity = start_velocity
+        self._gp_repr = ConvexPolygon(
+            [(self.size * x, self.size * y) for (x, y) in self._xy])
+
+
+class Asteroid1(AsteroidBase):
+    _xy = [(0.2, 0.4), (-0.08, 0.5), (-0.4, -0.4), (-0.5, -0.04),
+          (-0.2, -0.4), (0.3, -0.3), (0.5, 0.1)]
+
+    def __init__(self, size, position, start_velocity, angular_velocity):
+        #AsteroidBase.__init__(self, size=size, position=position,
+        #                      start_velocity=start_velocity,
+        #                      angular_velocity=angular_velocity)
+        super(Asteroid1, self).__init__(size=size, position=position,
+                                        start_velocity=start_velocity,
+                                        angular_velocity=angular_velocity)
+#TODO: Add more asteroid shapes.
