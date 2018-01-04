@@ -4,6 +4,11 @@
 @author: Sven Mayer
 """
 from asteroids import GamePiece
+import numpy as np
+
+
+DEFAULT_PROJECTILE_SIZE = 10.
+DEFAULT_PROJECTILE_VELO = 10.
 
 
 class GameBoard(object):
@@ -43,6 +48,45 @@ class GameBoard(object):
         self._projectiles.append(obj)
         self.moving_objects.append(obj)
 
+    def _asteroids_out_of_bounds(self):
+        for asteroid in self._asteroids:
+            pos = asteroid.position
+            if (pos[0] < 0. or pos[0] > self.size[0] or
+                    pos[1] < 0. or pos[1] > self.size[1]):
+                asteroid.position = (pos[0] % self.size[0],
+                                     pos[1] % self.size[1],
+                                     pos[2])
+
+    def _projectiles_out_of_bounds(self):
+        for idx, projectile in enumerate(self._projectiles[::-1]):
+            pos = projectile.position
+            if (pos[0] < 0. or pos[0] > self.size[0] or
+                    pos[1] < 0. or pos[1] > self.size[1]):
+                self._projectiles.pop(idx)
+                self.moving_objects.pop(self.moving_objects.index(projectile))
+
+    def _ship_out_of_bounds(self):
+        pos = self._ship.position
+        if (pos[0] < 0. or pos[0] > self.size[0] or
+                pos[1] < 0. or pos[1] > self.size[1]):
+            self._ship.position = (
+                pos[0] % self.size[0],
+                pos[1] % self.size[1],
+                pos[2])
+
+    def _calculate_new_position(self, dt):
+        for itm in self.moving_objects:
+            self.moving_objects.step(dt)
+
+    def step(self, dt):
+        self._calculate_new_position(dt)
+        self._asteroids_out_of_bounds()
+        self._projectiles_out_of_bounds()
+        self._ship_out_of_bounds()
+        # TODO: Check if anything collides.
+        # Ship destroyed.
+        # Asteroids destroyed.
+
     def ship_turn(self, direction):
         self._ship.turn = direction
 
@@ -52,6 +96,14 @@ class GameBoard(object):
         else:
             self._ship.thrust = 0
 
-#
-#    def ship_fire(self):
-#        ship_pos = self._ship.position
+    def ship_fire(self):
+        gunpos = self._ship.gunposition
+        velo = (
+            DEFAULT_PROJECTILE_VELO * np.cos(gunpos[2]),
+            DEFAULT_PROJECTILE_VELO * np.sin(gunpos[2]))
+
+        projectile = GamePiece.Projectile(size=DEFAULT_PROJECTILE_SIZE,
+                                          position=gunpos, velocity=velo)
+
+        self._projectiles.append(projectile)
+        self.moving_objects.append(projectile)

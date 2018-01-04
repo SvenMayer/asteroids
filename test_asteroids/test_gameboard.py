@@ -12,8 +12,7 @@ class TestGameBoardInit(unittest.TestCase):
     def test_init_arguments(self):
         gameboard = GameBoard.GameBoard(size=(200., 150.),
                                         no_asteroids=12)
-        self.assertAlmostEqual(gameboard.size[0], 200.)
-        self.assertAlmostEqual(gameboard.size[1], 150.)
+        self.assertSequenceEqual(gameboard.size, (200., 150.))
         self.assertEqual(gameboard.no_asteroids, 12)
 
     def test_init(self):
@@ -80,6 +79,27 @@ class TestGameBoardHiddenMethods(unittest.TestCase):
         self.assertEqual(self.gameboard._projectiles[-1], proj)
         self.assertEqual(self.gameboard.moving_objects[-1], proj)
 
+    def test_asteroid_out_of_bounds(self):
+        asteroid = GamePiece.Asteroid1(1., (120., 40., 2.), (1., 1.), 1.)
+        self.gameboard._add_asteroid(asteroid)
+        self.gameboard._asteroids_out_of_bounds()
+        self.assertSequenceEqual(asteroid.position, (20., 40., 2.))
+
+    def test_projectile_out_of_bounds(self):
+        projectile = GamePiece.Projectile(size=4., position=(30., -10, 2.),
+                                          velocity=(0., 0.))
+        self.gameboard._add_projectile(projectile)
+        self.gameboard._projectiles_out_of_bounds()
+        self.assertNotIn(projectile, self.gameboard._projectiles)
+        self.assertNotIn(projectile, self.gameboard.moving_objects)
+
+
+    def test_ship_out_of_bounds(self):
+        ship = GamePiece.Ship(size=10., position=(-30., 20., 1.))
+        self.gameboard._add_ship(ship)
+        self.gameboard._ship_out_of_bounds()
+        self.assertSequenceEqual(ship.position, (70., 20., 1.))
+
 
 class TestGameBoardUserMethods(unittest.TestCase):
     def setUp(self):
@@ -99,7 +119,13 @@ class TestGameBoardUserMethods(unittest.TestCase):
         self.gameboard.ship_accelerate(False)
         self.assertEqual(self.ship.thrust, 0)
 
-#    def test_fire_ship(self):
-#        self.gameboard._add_ship(self.ship)
-#        self.gameboard.ship_fire()
-#        self.assertEqual(len(self.gameboard._projectiles), 1)
+    def test_fire_ship(self):
+        self.gameboard._add_ship(self.ship)
+        self.gameboard.ship_fire()
+        self.assertSequenceEqual(self.gameboard._projectiles[-1].position,
+                                 self.ship.gunposition)
+        self.assertSequenceEqual(self.gameboard.moving_objects[-1].position,
+                                 self.ship.gunposition)
+
+if __name__ == u"__main__":
+    unittest.main()

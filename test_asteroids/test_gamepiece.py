@@ -66,6 +66,13 @@ class TestGamePiece(unittest.TestCase):
         self.assertAlmostEqual(gamePiece.position[0]+gamePiece.position[1]+gamePiece.position[2],
                                new3_pos[0]+new3_pos[1]+new3_pos[2])
 
+    def test_set_position_wrong_type(self):
+        gamePiece = GamePiece.GamePiece(position=(0., 0., 0.),
+                                        start_velocity=(1., 1.),
+                                        angular_velocity=1.5)
+        with self.assertRaises(TypeError):
+            gamePiece.position = (1., 2., 3., 4.)
+
     def test_spin_and_start_velo(self):
         position = (0., 0., 0.)
         start_velocity = 1., 2.
@@ -149,6 +156,12 @@ class TestShip(unittest.TestCase):
     def test_init(self):
         ship = GamePiece.Ship(size=2.4)
         self.assertAlmostEqual(ship.size, 2.4)
+
+    def test_gun_position(self):
+        ship = GamePiece.Ship(size=10., position=(0., 0., 0.))
+        self.assertAlmostEqual(ship.gunposition[0], 2.*10./3.)
+        self.assertAlmostEqual(ship.gunposition[1], 0.)
+        self.assertAlmostEqual(ship.gunposition[2], 0.)
 
 
 class TestAsteroidBase(unittest.TestCase):

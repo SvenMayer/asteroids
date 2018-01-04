@@ -11,7 +11,7 @@ class GamePiece():
                  angular_velocity=0.1*np.pi, start_velocity=(0., 0.)):
         if not (isinstance(position, tuple) and (len(position) == 3)):
             raise ValueError("argument 'position' takes tuple of size three")
-        self.position = position
+        self._position = position
         self.velocity = start_velocity
         self._acceleration = acceleration
         self._angular_velocity = angular_velocity
@@ -39,6 +39,20 @@ class GamePiece():
         if not (isinstance(value, int) and value in [-1, 0, 1]):
             raise ValueError("'turn' has to be integer -1, 0, or 1")
         self._turn = value
+
+    @property
+    def position(self):
+        return self._position
+
+    @position.setter
+    def position(self, value):
+        if isinstance(value, tuple) and len(value) == 3:
+            self._position = value
+        elif isinstance(value, list) and len(value) == 3:
+            self._position = (value[0], value[1], value[2])
+        else:
+            raise TypeError("Only tuples or lists with three elements can " +
+                            "be assigned to position.")
 
     def step(self, dt):
         new_angle = self.position[2]
@@ -125,6 +139,14 @@ class Ship(GamePiece):
              (0.2679491924311227*size, -1./3.*size),
              (0., 2./3.*size)])
         self.size = size
+
+    @property
+    def gunposition(self):
+        two_thirds_size = 2. / 3. * self.size
+        return (
+            self.position[0] + self._cos_angle * two_thirds_size,
+            self.position[1] + self._sin_angle * two_thirds_size,
+            self.position[2])
 
 
 class AsteroidBase(GamePiece):
