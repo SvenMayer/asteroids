@@ -3,7 +3,7 @@
 """
 @author: Sven Mayer
 """
-from space_fighters import GamePiece
+from asteroids import GamePiece
 
 
 class GameBoard(object):

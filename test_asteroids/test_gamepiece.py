@@ -4,7 +4,7 @@
 @author: Sven Mayer
 """
 import unittest
-from space_fighters import GamePiece
+from asteroids import GamePiece
 
 
 import numpy as np

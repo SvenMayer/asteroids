@@ -4,8 +4,8 @@
 @author: Sven Mayer
 """
 import unittest
-from space_fighters import GameBoard
-from space_fighters import GamePiece
+from asteroids import GameBoard
+from asteroids import GamePiece
 
 
 class TestGameBoardInit(unittest.TestCase):
