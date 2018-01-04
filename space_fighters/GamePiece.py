@@ -146,13 +146,17 @@ class AsteroidBase(GamePiece):
 
 class Asteroid1(AsteroidBase):
     _xy = [(0.2, 0.4), (-0.08, 0.5), (-0.4, -0.4), (-0.5, -0.04),
-          (-0.2, -0.4), (0.3, -0.3), (0.5, 0.1)]
+           (-0.2, -0.4), (0.3, -0.3), (0.5, 0.1)]
 
     def __init__(self, size, position, start_velocity, angular_velocity):
-        #AsteroidBase.__init__(self, size=size, position=position,
-        #                      start_velocity=start_velocity,
-        #                      angular_velocity=angular_velocity)
         super(Asteroid1, self).__init__(size=size, position=position,
                                         start_velocity=start_velocity,
                                         angular_velocity=angular_velocity)
-#TODO: Add more asteroid shapes.
+#
+# TODO: Add more asteroid shapes.
+
+class Projectile(GamePiece):
+    def __init__(self, size, position, velocity):
+        super(Projectile, self).__init__(
+            position=position, start_velocity=velocity)
+        self.size = size

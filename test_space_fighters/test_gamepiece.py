@@ -167,6 +167,13 @@ class TestAsteroids(unittest.TestCase):
                                3.6+1.2+0.+10.)
 
 
+class TestProjectile(unittest.TestCase):
+    def test_init_(self):
+        projectile = GamePiece.Projectile(size=1., position=(2., 3., 4.),
+                                          velocity=(4.2, 5.3))
+        self.assertAlmostEqual(projectile.size+projectile.position[1]+
+                               projectile.velocity[1], 1.+3.+5.3)
+
 
 if __name__ == u"__main__":
     unittest.main()
