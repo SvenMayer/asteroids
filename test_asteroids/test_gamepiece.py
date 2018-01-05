@@ -10,22 +10,22 @@ from asteroids import GamePiece
 import numpy as np
 
 
-class TestGamePiece(unittest.TestCase):
+class TestPhysicsEngine(unittest.TestCase):
     def test_initialize_empty(self):
-        gamePiece = GamePiece.GamePiece()
-        self.assertIsInstance(gamePiece, GamePiece.GamePiece)
+        gamePiece = GamePiece.PhysicsEngine()
+        self.assertIsInstance(gamePiece, GamePiece.PhysicsEngine)
 
     def test_initialize_wrong_position_parameters(self):
         with self.assertRaises(ValueError):
-            GamePiece.GamePiece((1., 2.))
+            GamePiece.PhysicsEngine((1., 2.))
 
     def test_initialize(self):
         pos = (1., 2., 0.)
-        gamePiece = GamePiece.GamePiece(position=pos)
+        gamePiece = GamePiece.PhysicsEngine(position=pos)
         self.assertEqual(gamePiece.position, pos)
 
     def test_increase_velo(self):
-        gamePiece = GamePiece.GamePiece((0., 0., 0.), acceleration=10.)
+        gamePiece = GamePiece.PhysicsEngine((0., 0., 0.), acceleration=10.)
         gamePiece.thrust = 1
         gamePiece.step(0.1)
         self.assertAlmostEqual(gamePiece.velocity, (1., 0.))
@@ -33,8 +33,8 @@ class TestGamePiece(unittest.TestCase):
     def test_turn(self):
         dt_step = 0.1
         angular_velocity = 0.1 * np.pi
-        gamePiece = GamePiece.GamePiece((0., 0., 0.),
-                                        angular_velocity=angular_velocity)
+        gamePiece = GamePiece.PhysicsEngine((0., 0., 0.),
+                                            angular_velocity=angular_velocity)
         gamePiece.turn = 1
         gamePiece.step(dt_step)
         self.assertAlmostEqual(gamePiece.position[2],
@@ -44,7 +44,7 @@ class TestGamePiece(unittest.TestCase):
         pos = (1., 2., np.pi/2.)
         angular_velocity = 0.1*np.pi
         acceleration = 1.5
-        gamePiece = GamePiece.GamePiece(
+        gamePiece = GamePiece.PhysicsEngine(
             pos, acceleration=acceleration, angular_velocity=angular_velocity)
         gamePiece.thrust = 1
         gamePiece.step(1.0)
@@ -67,9 +67,9 @@ class TestGamePiece(unittest.TestCase):
                                new3_pos[0]+new3_pos[1]+new3_pos[2])
 
     def test_set_position_wrong_type(self):
-        gamePiece = GamePiece.GamePiece(position=(0., 0., 0.),
-                                        start_velocity=(1., 1.),
-                                        angular_velocity=1.5)
+        gamePiece = GamePiece.PhysicsEngine(position=(0., 0., 0.),
+                                            start_velocity=(1., 1.),
+                                            angular_velocity=1.5)
         with self.assertRaises(TypeError):
             gamePiece.position = (1., 2., 3., 4.)
 
@@ -77,9 +77,9 @@ class TestGamePiece(unittest.TestCase):
         position = (0., 0., 0.)
         start_velocity = 1., 2.
         angular_velocity = np.pi/4.
-        gamePiece = GamePiece.GamePiece(position=position,
-                              start_velocity=start_velocity,
-                              angular_velocity=angular_velocity)
+        gamePiece = GamePiece.PhysicsEngine(position=position,
+                                            start_velocity=start_velocity,
+                                            angular_velocity=angular_velocity)
         turnDir = -1
         gamePiece.turn = turnDir
         dt = 1.5
@@ -150,6 +150,19 @@ class TestConvexPolygon(unittest.TestCase):
         poly = GamePiece.ConvexPolygon([(0., 0.), (0., 1.), (1., 0.)])
         poly.rotate(np.pi/2.)
         self.assertAlmostEqual(poly.xy[1][0], -1.)
+
+
+class TestGamePiece(unittest.TestCase):
+    def test_init_wrong_type(self):
+        with self.assertRaises(TypeError):
+            GamePiece.GamePiece(1.0, 10)
+
+    def test_init_polygon_xy_missing(self):
+        with self.assertRaises(TypeError):
+            GamePiece.GamePiece(1.0, 'polygon')
+
+    def test_init_point(self):
+        GamePiece.GamePiece(1.0, 'point')
 
 
 class TestShip(unittest.TestCase):

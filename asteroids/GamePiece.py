@@ -6,7 +6,7 @@
 import numpy as np
 
 
-class GamePiece():
+class PhysicsEngine():
     def __init__(self, position=(0., 0., 0.), acceleration=1.5,
                  angular_velocity=0.1*np.pi, start_velocity=(0., 0.)):
         if not (isinstance(position, tuple) and (len(position) == 3)):
@@ -128,17 +128,34 @@ class ConvexPolygon(object):
                             in self.side_normal]
 
 
+class GamePiece(PhysicsEngine):
+    def __init__(self, size, type, position=(0., 0., 0.), acceleration=1.5,
+                 angular_velocity=0.1*np.pi, start_velocity=(0., 0.), **kwargs):
+        super(GamePiece, self).__init__(
+            position=position, acceleration=acceleration,
+            angular_velocity=angular_velocity, start_velocity=start_velocity)
+        self.size = size
+        if type == "polygon":
+            if 'xy' not in kwargs:
+                raise TypeError("Argument 'xy' required for GamePiece type " +
+                                "'polygon'")
+            self._gb_repr = ConvexPolygon(xy=kwargs['xy'])
+        elif type == "point":
+            # TODO: Implement Point
+            pass
+        else:
+            raise TypeError("Unknown type '{0:s}'".format(str(type)))
+
+
 class Ship(GamePiece):
     def __init__(self, size, position=(0., 0., 0.), acceleration=1.5,
                  angular_velocity=0.1*np.pi):
         super(Ship, self).__init__(
+            size=size, xy=[(-0.2679491924311227*size, -1./3.*size),
+                           (0.2679491924311227*size, -1./3.*size),
+                           (0., 2./3.*size)], type="polygon",
             position=position, acceleration=acceleration,
             angular_velocity=angular_velocity, start_velocity=(0., 0.))
-        self._gb_repr = ConvexPolygon(
-            [(-0.2679491924311227*size, -1./3.*size),
-             (0.2679491924311227*size, -1./3.*size),
-             (0., 2./3.*size)])
-        self.size = size
 
     @property
     def gunposition(self):
@@ -151,19 +168,18 @@ class Ship(GamePiece):
 
 class AsteroidBase(GamePiece):
     def __init__(self, size, position, start_velocity, angular_velocity):
-        super(AsteroidBase, self).__init__(
-            position=position, angular_velocity=np.abs(angular_velocity))
         # AsteroidBase cannot be instantiated.
         if type(self) is AsteroidBase:
             raise TypeError("AsteroidBase cannot be instantiated")
+        super(AsteroidBase, self).__init__(
+            size=size, type="polygon",
+            xy=[(size * x, size * y) for (x, y) in self._xy],
+            position=position, angular_velocity=np.abs(angular_velocity))
         if angular_velocity > 0.:
             self.turn = 1
         elif angular_velocity < 0.:
             self.turn = -1
-        self.size = size
         self.velocity = start_velocity
-        self._gp_repr = ConvexPolygon(
-            [(self.size * x, self.size * y) for (x, y) in self._xy])
 
 
 class Asteroid1(AsteroidBase):
@@ -180,5 +196,4 @@ class Asteroid1(AsteroidBase):
 class Projectile(GamePiece):
     def __init__(self, size, position, velocity):
         super(Projectile, self).__init__(
-            position=position, start_velocity=velocity)
-        self.size = size
+            size, type="point", position=position, start_velocity=velocity)
