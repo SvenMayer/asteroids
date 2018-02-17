@@ -151,6 +151,20 @@ class TestConvexPolygon(unittest.TestCase):
         poly.rotate(np.pi/2.)
         self.assertAlmostEqual(poly.xy[1][0], -1.)
 
+    def test_pt_inside(self):
+        poly1 = GamePiece.ConvexPolygon([(0., 0.), (1., 1.), (0., 1.)])
+        # Only points within the polygon's area return True.
+        # Points outside the polygon's area as well as points on the edge
+        # return False.
+        self.assertTrue(poly1.point_inside((0.05, 0.2)))
+        self.assertFalse(poly1.point_inside((2., 2.)))
+        self.assertFalse(poly1.point_inside((1., 1.)))
+
+
+class TestPoint(unittest.TestCase):
+    def test_init(self):
+        GamePiece.Point((10., 2.))
+
 
 class TestGamePiece(unittest.TestCase):
     def test_init_wrong_type(self):
@@ -162,7 +176,33 @@ class TestGamePiece(unittest.TestCase):
             GamePiece.GamePiece(1.0, 'polygon')
 
     def test_init_point(self):
-        GamePiece.GamePiece(1.0, 'point')
+        gb = GamePiece.GamePiece(1.0, 'point', position=(1., 1., 0.))
+        self.assertIsInstance(gb._gb_repr, GamePiece.Point)
+
+    def test_col_poly_poly(self):
+        gb1 = GamePiece.GamePiece(1.0, 'polygon',
+                                  xy=[(0., 0.), (2., 0.), (0., 1.)])
+        gb2 = GamePiece.GamePiece(1.0, 'polygon',
+                                  xy=[(1., 0.), (4., 2.), (4., 0.)])
+        gb3 = GamePiece.GamePiece(1.0, 'polygon',
+                                  xy=[(-1., -1.), (-4., -2.), (-4., -0.)])
+        self.assertTrue(gb1.collides(gb2))
+        self.assertFalse(gb1.collides(gb3))
+
+    def test_col_pt_pt(self):
+        pt1 = GamePiece.GamePiece(1.0, 'point', position=(1., 0., 0.))
+        pt2 = GamePiece.GamePiece(1.0, 'point', position=(1., 0., 0.))
+        self.assertFalse(pt1.collides(pt2))
+
+    def test_col_poly_pt(self):
+        pt1 = GamePiece.GamePiece(1.0, 'point', position=(1., 1., 0.))
+        pt2 = GamePiece.GamePiece(1.0, 'point', position=(2., 2., 0.))
+        poly1 = GamePiece.GamePiece(
+            1.0, 'polygon', xy=[(0., 0.), (2., 0.), (2., 2.), (0., 2.)])
+        self.assertTrue(pt1.collides(poly1))
+        self.assertTrue(poly1.collides(pt1))
+        self.assertFalse(pt2.collides(poly1))
+        self.assertFalse(poly1.collides(pt2))
 
 
 class TestShip(unittest.TestCase):

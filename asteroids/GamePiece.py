@@ -75,6 +75,12 @@ class PhysicsEngine():
         self.position = (new_x, new_y, new_angle)
 
 
+
+class Point(object):
+    def __init__(self, xy):
+        self.xy = xy
+
+
 class ConvexPolygon(object):
     def __init__(self, xy):
         self.xy = xy
@@ -95,8 +101,11 @@ class ConvexPolygon(object):
             self.side_normal.append((-1.*side[1], side[0]))
 
     def projection(self, proj_vec):
-        return [xy[0] * proj_vec[0] + xy[1] * proj_vec[1] for
-                xy in self.xy]
+        return [self.project_pt(xy, proj_vec) for xy in self.xy]
+
+    @staticmethod
+    def project_pt(xy, vec):
+        return xy[0] * vec[0] + xy[1] * vec[1]
 
     def collides(self, other):
         # Find out which polygon has less sides to minimize the number
@@ -119,6 +128,19 @@ class ConvexPolygon(object):
 
         return collides
 
+    def point_inside(self, xy):
+        """Finds out if the points xy is inside the area of the polygon."""
+        is_inside = True
+        for normal in self.side_normal:
+            my_points = self.projection(normal)
+            my_range = min(my_points), max(my_points)
+            other_point = self.project_pt(xy, normal)
+            if (my_range[1] <= other_point or
+                    my_range[0] >= other_point):
+                is_inside = False
+                break
+        return is_inside
+
     def rotate(self, angle=0.0):
         sina = np.sin(angle)
         cosa = np.cos(angle)
@@ -135,17 +157,32 @@ class GamePiece(PhysicsEngine):
             position=position, acceleration=acceleration,
             angular_velocity=angular_velocity, start_velocity=start_velocity)
         self.size = size
+        self.type = type
         if type == "polygon":
             if 'xy' not in kwargs:
-                raise TypeError("Argument 'xy' required for GamePiece type " +
-                                "'polygon'")
+                raise TypeError("Argument 'xy' required for GamePiece type 'polygon'")
             self._gb_repr = ConvexPolygon(xy=kwargs['xy'])
         elif type == "point":
-            # TODO: Implement Point
-            pass
+            self._gb_repr = Point((position[0], position[1]))
         else:
             raise TypeError("Unknown type '{0:s}'".format(str(type)))
 
+    def collides(self, other):
+        if self.type == "point" and other.type == "point":
+            # Points cannot collide.
+            return False
+        elif self.type == "polygon" and other.type == "polygon":
+            # Check polygon collision
+            return self._gb_repr.collides(other._gb_repr)
+        if (self.type == "polygon" and other.type == "point" or
+                self.type == "point" and other.type == "polygon"):
+            if self.type == "polygon":
+                poly = self._gb_repr
+                point = other._gb_repr.xy
+            else:
+                poly = other._gb_repr
+                point = self._gb_repr.xy
+            return poly.point_inside(point)
 
 class Ship(GamePiece):
     def __init__(self, size, position=(0., 0., 0.), acceleration=1.5,
