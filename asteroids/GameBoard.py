@@ -27,6 +27,7 @@ class GameBoard(object):
         self._projectiles = []
         self._ship = None
         self.moving_objects = []
+        self.gameover = False
 
     def _add_asteroid(self, obj):
         if not isinstance(obj, GamePiece.AsteroidBase):
@@ -77,6 +78,19 @@ class GameBoard(object):
     def _calculate_new_position(self, dt):
         for itm in self.moving_objects:
             self.moving_objects.step(dt)
+
+    def _resolve_collision(self):
+        # Check if the ship collides with any asteroid.
+        for asteroid in self._asteroids:
+            if self._ship is not None and self._ship.collides(asteroid):
+                self.gameover = True
+                break
+        for i in range(len(self._asteroids)-1, -1, -1):
+            for j in range(len(self._projectiles)-1, -1, -1):
+                if self._asteroids[i].collides(self._projectiles[j]):
+                    self._asteroids.pop(i)
+                    self._projectiles.pop(j)
+                    break
 
     def step(self, dt):
         self._calculate_new_position(dt)

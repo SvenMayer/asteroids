@@ -22,6 +22,7 @@ class TestGameBoardInit(unittest.TestCase):
         self.assertTrue(hasattr(gameboard, 'moving_objects'))
         self.assertTrue(hasattr(gameboard, '_ship'))
         self.assertTrue(hasattr(gameboard, '_projectiles'))
+        self.assertTrue(hasattr(gameboard, 'gameover'))
 
     def test_init_wrong_size_argument(self):
         with self.assertRaises(AttributeError):
@@ -93,12 +94,32 @@ class TestGameBoardHiddenMethods(unittest.TestCase):
         self.assertNotIn(projectile, self.gameboard._projectiles)
         self.assertNotIn(projectile, self.gameboard.moving_objects)
 
-
     def test_ship_out_of_bounds(self):
         ship = GamePiece.Ship(size=10., position=(-30., 20., 1.))
         self.gameboard._add_ship(ship)
         self.gameboard._ship_out_of_bounds()
         self.assertSequenceEqual(ship.position, (70., 20., 1.))
+
+    def test_collision_asteroid_collides_ship(self):
+        ship = GamePiece.Ship(size=1.,position=(0., 0., 2.))
+        asteroid = GamePiece.Asteroid1(size=1., position=(0., 0., 4.),
+                                       start_velocity=(1., 1.),
+                                       angular_velocity=-10.)
+        self.gameboard._add_ship(ship)
+        self.gameboard._add_asteroid(asteroid)
+        self.gameboard._resolve_collision()
+        self.assertTrue(self.gameboard.gameover)
+
+    def test_collision_asteroid_collides_projectile(self):
+        projectile = GamePiece.Projectile(1.0, (0., 0., 0.), (1., 0.))
+        asteroid = GamePiece.Asteroid1(size=1., position=(0., 0., 4.),
+                                       start_velocity=(1., 1.),
+                                       angular_velocity=-10.)
+        self.gameboard._add_asteroid(asteroid)
+        self.gameboard._add_projectile(projectile)
+        self.gameboard._resolve_collision()
+        self.assertNotIn(asteroid, self.gameboard._asteroids)
+        self.assertNotIn(projectile, self.gameboard._projectiles)
 
 
 class TestGameBoardUserMethods(unittest.TestCase):
